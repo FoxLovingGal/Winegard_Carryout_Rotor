@@ -49,11 +49,6 @@ print ('Listening for rotor commands on', listen_ip, ':', listen_port)
 conn, addr = client_socket.accept()
 print ('Connection from ',addr)
 
-
-#Would be nice to get initial / resting position from Carryout firmware
-#I have not found a way to do this, just live position while motors are running
-
-
 #pass rotor commands to Carryout
 while 1:
 	data = conn.recv(100)  #get Gpredict's message
@@ -61,7 +56,7 @@ while 1:
 		continue
 		
 	cmd = data.decode("utf-8").strip().split(" ")   #grab the incoming command
-	#print("Received: ",cmd)    #debugging, what did Gpredict send?
+	#print("Received: ",cmd)    #debugging
 	
 	if cmd[0] == "p":   #Gpredict is requesting current position
 		response = "{}\n{}\n".format(current_az, current_el)
@@ -110,7 +105,7 @@ while 1:
 		
 		
 	elif cmd[0] == "S": #Gpredict says to stop
-		print('Gpredict disconnected, exiting') #Do we want to do something else with this?
+		print('Gpredict disconnected, exiting') 
 		conn.close()
 		carryout.close()
 		exit()
