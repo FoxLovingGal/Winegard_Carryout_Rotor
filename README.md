@@ -9,7 +9,9 @@ This read me shall go over the hardware requirements, Software requirements, and
 
 ## Hardware Requirements
 
-WIP
+This code has been developed for use on a Winegard Carryout G2, running software version 02.04.43. other models of the carryout exist, but no testing of this code has been conducted on them, making it very likely that there would need to be at least some minor tweaks in order to get it working on those models.
+
+There are various ways in which you can connect a computer to it, the ways in which we have tested and gotten it working have been 1. utilizing the same method as Gabe Emerson, using a RJ-25 cable connected to a RS-232 to RS485 adapter which is in turn connected to a USB to serial adapter. We however were also able to get it working simply using a RJ-25 cable and a RS485 to USB converter. The latter naturally results in a much shorter cable, which for wired connection is likely less ideal but will prove useful down the line for connecting to the carryout without a wired connection.
 
 ## Connecting to Winegard
 
