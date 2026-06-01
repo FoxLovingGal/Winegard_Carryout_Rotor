@@ -36,3 +36,13 @@ This command does what it says on the tin, it takes two parameters the motor tha
 
 h - home motors
 This is perhaps the most pertinent command for you to be aware of, as it is the command that allows us to do useful things with the antenna despite turning off the automatic tracking mode. This command homes the motors which causes them to find their limits and return to a default position. You can home the motors individually using their motor number or together by entering \* instead of the motor number
+
+### NVS
+
+Under this menu are the following
+
+d - display NVS values
+as it says on the tin this will show you some useful values that are currently set in the Winegard, most useful this is where you will find the value that sets whether the tracking behavior is currently active or not.
+
+e - edit NVS values
+This of course is what you will need to do to disable the tracking behavior, on our Winegard the value that we needed to change to accomplish this was value 20.
