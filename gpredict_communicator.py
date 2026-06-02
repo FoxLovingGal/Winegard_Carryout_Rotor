@@ -3,6 +3,7 @@
 #Credit to Gabe Emerson / Saveitforparts 2024, Email: gabe@saveitforparts.com for creating much of the base
 
 import paramiko
+import sys
 import socket 
 import regex as re
 import getpass
@@ -75,12 +76,12 @@ while 1:
 		print('Gpredict disconnected, exiting') 
 		conn.close()
 		client.close()
-		exit()
+		sys.exit()
 	else:
 		print('Exiting')
 		conn.close()
 		client.close()
-		exit()
+		sys.exit()
 
 
 

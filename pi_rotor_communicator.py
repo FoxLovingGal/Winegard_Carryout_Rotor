@@ -1,5 +1,11 @@
 import serial
 import regex as re
+import sys
+
+
+def timeout():
+	print("did not receive input after starting, closing program...")
+	sys.exit()
 
 
 #initialize some variables
@@ -88,6 +94,6 @@ while 1:
 		
 		
 	elif cmd[0] == "S": #Gpredict says to stop
-		exit()
+		sys.exit()
 	else:
-		exit()
+		sys.exit()

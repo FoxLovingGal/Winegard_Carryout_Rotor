@@ -9,7 +9,9 @@ This read me shall go over the hardware requirements, Software requirements, and
 
 ## Hardware Requirements
 
-WIP
+This code has been developed for use on a Winegard Carryout G2, running software version 02.04.43. other models of the carryout exist, but no testing of this code has been conducted on them, making it very likely that there would need to be at least some minor tweaks in order to get it working on those models. The pi model that was used to create this code was the Raspberry Pi Zero 2 W running Raspberry Pi OS Lite (64-bit), kernel version 6.12
+
+The pi_rotor_communicator.py should run on the raspberry pi while thbe gpredict_communicator.py should run on your local computer.
 
 ## Connecting to Winegard
 
@@ -34,3 +36,11 @@ This command does what it says on the tin, it takes two parameters the motor tha
 
 h - home motors
 This is perhaps the most pertinent command for you to be aware of, as it is the command that allows us to do useful things with the antenna despite turning off the automatic tracking mode. This command homes the motors which causes them to find their limits and return to a default position. You can home the motors individually using their motor number or together by entering \* instead of the motor number
+
+### NVS
+
+Under this menu are the following
+
+d - display NVS values as it says on the tin this will show you some useful values that are currently set in the Winegard, most useful this is where you will find the value that sets whether the tracking behavior is currently active or not.
+
+e - edit NVS values This of course is what you will need to do to disable the tracking behavior, on our Winegard the value that we needed to change to accomplish this was value 20.
