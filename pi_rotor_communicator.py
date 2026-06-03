@@ -18,7 +18,7 @@ try:
 
 	#define "carryout" as the serial port device to interface with note we're def gonna need to change the port for the raspberry pi,
 	carryout = serial.Serial(
-		port='/dev/ttyUSB0',             
+		port="/dev/ttyUSB0",             
 		baudrate = 115200,
 		parity=serial.PARITY_NONE,
 		stopbits=serial.STOPBITS_ONE,
@@ -27,20 +27,20 @@ try:
 
 
 
-	carryout.write(bytes(b'q\r')) #go back to root menu in case firmware was left in a submenu
-	carryout.write(bytes(b'\r')) #clear firmware prompt to avoid unknown command errors
+	carryout.write(bytes(b"q\r")) #go back to root menu in case firmware was left in a submenu
+	carryout.write(bytes(b"\r")) #clear firmware prompt to avoid unknown command errors
 
 	#opens up motor menu and homes the motors, this way we will not have to manually open it up every time we want to use it
-	carryout.write(bytes(b'mot\r')) 
-	carryout.write(bytes(b'h *\r'))
-	finished = ''
-	reading = ''
+	carryout.write(bytes(b"mot\r")) 
+	carryout.write(bytes(b"h *\r"))
+	finished = ""
+	reading = ""
 	#keeps code in this while loop until the home command is done, 
 	while not finished:
 		reading = carryout.read(100).decode().strip()
 		finished = re.search(r"MOT>$", reading)
 
-	carryout.write(bytes(b'q\r'))
+	carryout.write(bytes(b"q\r"))
 	socket.send(b"ready")
 
 
@@ -68,39 +68,39 @@ try:
 			
 			
 			#tell Carryout to move to target position
-			carryout.write(bytes(b'mot\r'))
+			carryout.write(bytes(b"mot\r"))
 
-			az_command = ('a 0 ' + str(target_az) + '\r').encode('ascii')
+			az_command = ("a 0 " + str(target_az) + "\r").encode("ascii")
 			carryout.write(az_command)
 
 			reply = carryout.read(100).decode().strip()
 			#print('This is the reply for azimuth: ', reply)
-			match = re.search('= (\\d+\\.\\d+)', reply)
+			match = re.search("= (\\d+\\.\\d+)", reply)
 			current_az = match.group(1).strip()
 
 			while carryout.in_waiting != 0:
 				carryout.read(100)
 
-			el_command = ('a 1 ' + str(target_el) + '\r').encode('ascii')
+			el_command = ("a 1 " + str(target_el) + "\r").encode("ascii")
 			carryout.write(el_command)
 
 			reply = carryout.read(100).decode().strip()
 			#print('This is the reply for elevation: ', reply)
-			match = re.search('= (\\d+\\.\\d+)', reply)
+			match = re.search("= (\\d+\\.\\d+)", reply)
 			current_el = match.group(1).strip()
 				
 			#Tell Gpredict things went correctly
 			socket.send(b"clear")
 							
-			carryout.write(bytes(b'q\r')) #go back to Carryout's root menu
+			carryout.write(bytes(b"q\r")) #go back to Carryout's root menu
 			
 			
 		elif cmd[0] == "S": #Gpredict says to stop
 			carryout.close()
-			os.execv(sys.executable, ['python3'] + sys.argv)
+			os.execv(sys.executable, ["python3"] + sys.argv)
 		else:
 			carryout.close()
-			os.execv(sys.executable, ['python3'] + sys.argv)
+			os.execv(sys.executable, ["python3"] + sys.argv)
 except KeyboardInterrupt:
 	print("ending program")
 	try:
