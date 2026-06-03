@@ -1,5 +1,8 @@
-#Package requirements for carryout_rotor.py
+#Package requirements for gpredict_communicator.py and pi_rotor_communicator.py
 
 pyserial
 regex
 socket
+zmq
+sys
+os
