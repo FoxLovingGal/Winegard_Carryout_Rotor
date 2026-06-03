@@ -14,11 +14,13 @@ try:
 	current_el = 0.00
 	index = 0
 
+	ip = input("Please input IP of the Raspberry PI: ")
+
 	context = zmq.Context()
-	print("Connecting to raspberry pi")
+	print("Connecting to Raspberry Pi")
 	pisocket = context.socket(zmq.REQ)
-	pisocket.connect ("tcp://10.140.108.208:5556")
-	pisocket.RCVTIMEO = 240000
+	pisocket.connect ("tcp://" + ip + ":5556")
+	pisocket.RCVTIMEO = 240000 
 
 	pisocket.send(b"Start up")
 	reply = pisocket.recv().decode("utf-8")
