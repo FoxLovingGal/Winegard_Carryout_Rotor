@@ -20,9 +20,10 @@ try:
 	context = zmq.Context()
 	print("Connecting to Raspberry Pi")
 	pisocket = context.socket(zmq.REQ)
-	pisocket.connect ("tcp://", ip, ":5556")
+	pisocket.connect ("tcp://" + ip + ":5556")
 	pisocket.RCVTIMEO = 240000 
 
+	print("Successfully connected")
 	pisocket.send(b"Start up")
 	reply = pisocket.recv().decode("utf-8")
 
