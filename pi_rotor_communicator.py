@@ -103,6 +103,8 @@ try:
 			os.execv(sys.executable, ['python3'] + sys.argv)
 except KeyboardInterrupt:
 	print("ending program")
-	if(carryout):
+	try:
 		carryout.close()
+	except NameError:
+		pass
 	sys.exit()

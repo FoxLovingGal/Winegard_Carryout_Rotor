@@ -16,6 +16,7 @@ try:
 
 	ip = input("Please input IP of the Raspberry PI: ")
 
+	#Connecting to the Raspberry Pi
 	context = zmq.Context()
 	print("Connecting to Raspberry Pi")
 	pisocket = context.socket(zmq.REQ)
@@ -33,7 +34,7 @@ try:
 
 	#listen to local port for rotctld commands
 	listen_ip = '127.0.0.1'  #listen on localhost
-	listen_port = 4533     #pass this from command line in future?
+	listen_port = 4533     
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	client_socket.bind((listen_ip, listen_port))
 	client_socket.listen(1)
@@ -95,11 +96,17 @@ try:
 
 except KeyboardInterrupt:
 	print("ending program")
-	if(context):
-		if(pisocket):
+	try:
+		try:
 			pisocket.close()
+		except NameError:
+			pass
 		context.term()
-	if(conn):
+	except NameError:
+		pass
+	try:
 		conn.close()
+	except NameError:
+		pass
 	sys.exit()
 
