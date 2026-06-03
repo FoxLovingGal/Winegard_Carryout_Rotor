@@ -5,8 +5,7 @@
 import zmq
 import sys
 import socket 
-import regex as re
-import getpass
+
 
 try:
 
