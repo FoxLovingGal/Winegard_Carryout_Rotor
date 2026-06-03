@@ -2,86 +2,103 @@
 #This version created by Addison Wolf
 #Credit to Gabe Emerson / Saveitforparts 2024, Email: gabe@saveitforparts.com for creating much of the base
 
-import paramiko
+import zmq
 import sys
 import socket 
 import regex as re
 import getpass
 
-#initialize some variables
-current_az = 0.00  
-current_el = 0.00
-index = 0
+try:
 
-host = input("Please enter the ip address: ")
-username = input("Please enter the username: ")
-password = getpass.getpass("Please enter the password: ")
+	#initialize some variables
+	current_az = 0.00  
+	current_el = 0.00
+	index = 0
 
-client = paramiko.client.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect(host, username=username, password=password)
-stdin, stdout,stderr = client.exec_command("python3 pi_rotor_communicator.py", timeout=3600)
+	context = zmq.Context()
+	print("Connecting to raspberry pi")
+	pisocket = context.socket(zmq.REQ)
+	pisocket.connect ("tcp://10.140.108.208:5556")
+	pisocket.RCVTIMEO = 240000
 
-while stdout.readline() == "":
-	continue
+	pisocket.send(b"Start up")
+	reply = pisocket.recv().decode("utf-8")
 
-#listen to local port for rotctld commands
-listen_ip = '127.0.0.1'  #listen on localhost
-listen_port = 4533     #pass this from command line in future?
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.bind((listen_ip, listen_port))
-client_socket.listen(1)
+	if(reply != "ready"):
+		print("an error has occured, reply is: ", reply)
+		pisocket.close()
+		context.term()
+		sys.exit()
 
-print ('Listening for rotor commands on', listen_ip, ':', listen_port)
-conn, addr = client_socket.accept()
-print ('Connection from ',addr)
+	#listen to local port for rotctld commands
+	listen_ip = '127.0.0.1'  #listen on localhost
+	listen_port = 4533     #pass this from command line in future?
+	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	client_socket.bind((listen_ip, listen_port))
+	client_socket.listen(1)
 
-while 1:
-	data = conn.recv(100)  #get Gpredict's message
-	if not data:
-		continue
+	print ('Listening for rotor commands on', listen_ip, ':', listen_port)
+	conn, addr = client_socket.accept()
+	print ('Connection from ',addr)
 
-	decoded = data.decode("utf-8")
-	#print(decoded)
-	stdin.write(decoded)
-	stdin.flush()
-
-	cmd = decoded.strip().split(" ")   #grab the incoming command
-	print("Received: ",cmd[0])    #debugging
-	
-	if cmd[0] == "p":   #Gpredict is requesting current position
-		response = "{}\n{}\n".format(current_az, current_el)
-		print(response)
-		conn.send(response.encode('utf-8'))
-		
-	elif cmd[0] == "P":   #Gpredict is sending desired position
-		current_az = float(cmd[1])
-		current_el = float(cmd[2])
-
-		test = stdout.readline()
-
-		while test == "":
-			print(test)
-			test = stdout.readline()
+	while 1:
+		data = conn.recv(100)  #get Gpredict's message
+		if not data:
 			continue
 
-		#Tell Gpredict things went correctly
-		response="RPRT 0\n"  #Everything's under control, situation normal 
-		conn.send(response.encode('utf-8'))
-						
-		#stdin.write(bytes(b'q\r')) #go back to Carryout's root menu
-		
-		
-	elif cmd[0] == "S": #Gpredict says to stop
-		print('Gpredict disconnected, exiting') 
-		conn.close()
-		client.close()
-		sys.exit()
-	else:
-		print('Exiting')
-		conn.close()
-		client.close()
-		sys.exit()
+		decoded = data.decode("utf-8")
+		#print(decoded)
 
 
+		cmd = decoded.strip().split(" ")   #grab the incoming command
+		print("Received: ",cmd[0])    #debugging
+		
+		if cmd[0] == "p":   #Gpredict is requesting current position
+			response = "{}\n{}\n".format(current_az, current_el)
+			#print(response)
+			conn.send(response.encode('utf-8'))
+			
+		elif cmd[0] == "P":   #Gpredict is sending desired position
+			pisocket.send(decoded.encode('utf-8'))
+			response = pisocket.recv().decode("utf-8")
+
+			if(response != "clear"):
+				print("server replied with unexpected value")
+				context.term()
+				conn.close()
+				sys.exit()
+
+			current_az = float(cmd[1])
+			current_el = float(cmd[2])
+
+
+			#Tell Gpredict things went correctly
+			response="RPRT 0\n"  #Everything's under control, situation normal 
+			conn.send(response.encode('utf-8'))
+							
+			
+			
+		elif cmd[0] == "S": #Gpredict says to stop
+			pisocket.send(decoded.encode('utf-8'))
+			print('Gpredict disconnected, exiting') 
+			conn.close()
+			pisocket.close()
+			context.term()
+			sys.exit()
+		else:
+			print('Exiting')
+			conn.close()
+			pisocket.close()
+			context.term()
+			sys.exit()
+
+except KeyboardInterrupt:
+	print("ending program")
+	if(context):
+		if(pisocket):
+			pisocket.close()
+		context.term()
+	if(conn):
+		conn.close()
+	sys.exit()
 
