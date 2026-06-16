@@ -101,17 +101,17 @@ try:
                     total += 1
                 else:
                      #print(reply)
-                      reply = reply.decode().strip()
-                      match = re.search("= (\\d+\\.\\d+)", reply)
-                      current_az = match.group(1).strip()
-                      failed_writes_row = 0
-                      total += 1
-                
-                
-                
-
-
-                #print('This is the reply for azimuth: ', reply)
+                     try:
+                            reply = reply.decode().strip()
+                            match = re.search("= (\\d+\\.\\d+)", reply)
+                            current_az = match.group(1).strip()
+                            failed_writes_row = 0
+                            total += 1
+                     except UnicodeDecodeError:
+                            log.write("An error in writing/reading has occured")
+                            failed_writes += 1
+                            failed_writes_row += 1
+                            total += 1
                 
                 
 
@@ -135,15 +135,18 @@ try:
                     failed_writes_row += 1
                     total += 1
                 else:
-                    #print(reply)
-                    reply = reply.decode().strip()
-
-                    #print('This is the reply for elevation: ', reply)
-                    match = re.search("= (\\d+\\.\\d+)", reply)
-                    current_el = match.group(1).strip()
-                    current_el = target_el
-                    failed_writes_row = 0
-                    total += 1
+                    try:
+                        reply = reply.decode().strip()
+                        match = re.search("= (\\d+\\.\\d+)", reply)
+                        current_el = match.group(1).strip()
+                        current_el = target_el
+                        failed_writes_row = 0
+                        total += 1
+                    except UnicodeDecodeError:
+                            log.write("An error in writing/reading has occured")
+                            failed_writes += 1
+                            failed_writes_row += 1
+                            total += 1
 
 
                 
