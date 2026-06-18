@@ -163,7 +163,7 @@ try:
 
 
                 if(row["Satellite"] == pass_list.iloc[index + 1]["Satellite"]):
-                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize(None) > datetime.datetime.now():
+                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize(None) > datetime.datetime.now().tz_localize("UTC"):
                                 pass
                 else:
                         continue

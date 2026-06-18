@@ -5,7 +5,7 @@ import random
 pass_list = pd.read_csv("csv_files/orbit_samples.csv")
 log = open("moveLog.txt", "a")
 
-pass_list["Timestamp"] = pd.to_datetime(pass_list["Timestamp (UTC)"])
+pass_list["Timestamp"] = pd.to_datetime(pass_list["Timestamp (UTC)"], format='mixed')
 target_list = []
 processed = 0
 
