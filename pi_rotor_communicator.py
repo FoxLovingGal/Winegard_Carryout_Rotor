@@ -163,13 +163,13 @@ try:
 
 
                 if(row["Satellite"] == pass_list.iloc[index + 1]["Satellite"]):
-                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize(None) > datetime.datetime.now().tz_localize("UTC"):
+                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize("UTC") > datetime.datetime.now(datetime.UTC):
                                 pass
                 else:
                         continue
 
 except KeyboardInterrupt:
-        print("ending program")
+        print("\nending program")
         log.write("run was ended by user \n")
         log.write("Total failed writes: " + str(failed_writes) + "\n")
         log.write("failed writes rate: " + str(failed_writes/total) + "\n")
