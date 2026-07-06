@@ -1,17 +1,12 @@
-
 import serial
 import regex as re
 import sys
 import pandas as pd
-import datetime
+from datetime import datetime, timedelta, timezone
 
 
 try:
-        #context = zmq.Context()
-        #socket = context.socket(zmq.REP)
-        #socket.bind("tcp://*:%s" % 5556)
 
-        #socket.recv()
         #initialize some variables
         log = open("moveLog.txt", "a")
         current_az = 0.00
@@ -42,7 +37,7 @@ try:
         reading = ""
         #keeps code in this while loop until the home command is done,
         while not finished:
-                reading = carryout.read(100)
+                reading = carryout.read_all()
                 try:
                         reading = reading.decode().strip()
                         finished = re.search(r"MOT>$", reading)
@@ -52,22 +47,25 @@ try:
 
 
         carryout.write(bytes(b"q\r"))
-        #socket.send(b"ready")
         
         
         pass_list = pd.read_csv("csv_files/target_list.csv")
-        time_stamp = datetime.datetime.now()
+        time_stamp = datetime.now()
         log.write("start of log " + str(time_stamp) + "\n")
         
 
 
 
         for index, row in pass_list.iterrows():
+                #checks how far behind it is
+                if  pd.to_datetime(pass_list.iloc[index]["Timestamp (UTC)"]).tz_localize("UTC") + timedelta(seconds=0.5) < datetime.now(timezone.utc):
+                                continue
+
                 #checks to see if we've hit a threshold of failed writes
                 if failed_writes_row > 5:
                         print("more than five failed writes in a row ending program")
                         log.write("Total failed writes: " + str(failed_writes) + "\n")
-                        log.write("End time stamp " + str(datetime.datetime.now()) + "\n")
+                        log.write("End time stamp " + str(datetime.now()) + "\n")
                         log.write("failed writes rate: " + str(failed_writes/total) + "\n")
                         try:
                                 carryout.close()
@@ -81,7 +79,7 @@ try:
                 
                 #cleaning out the buffer of the carryout
                 while carryout.in_waiting != 0:
-                        carryout.read(100)
+                        carryout.read_all()
                 
                 
 
@@ -92,7 +90,8 @@ try:
                 az_command = ("a 0 " + str(target_az) + "\r").encode("ascii")
                 carryout.write(az_command)
                        
-                reply = carryout.read(100)
+                reply = carryout.read_until(b"MOT>")
+                reply = carryout.read_until(b"MOT>")
                         
                 if not reply:
                     log.write("An error in writing/reading has occured")
@@ -116,9 +115,9 @@ try:
                 
 
                 while carryout.in_waiting != 0:
-                        carryout.read(100)
+                        carryout.read_all()
 
-                time_stamp = datetime.datetime.now()
+                time_stamp = datetime.now()
                 log.write(row["Satellite"] + " first movement " + str(time_stamp) +"\n")
 
                 el_command = ("a 1 " + str(target_el) + "\r").encode("ascii")
@@ -126,7 +125,7 @@ try:
                 carryout.write(el_command)
 
 
-                reply = carryout.read(100)
+                reply = carryout.read_until(b">")
                 #print(reply)
                         
                 if not reply:
@@ -151,19 +150,18 @@ try:
 
                 
 
-                time_stamp = datetime.datetime.now()
+                time_stamp = datetime.now()
                 log.write(row["Satellite"] + " second movement " + str(time_stamp) +"\n")
 
                 #print(match)
                 carryout.write(bytes(b"q\r")) #go back to Carryout's root menu
 
-                #socket.send(b"clear")
-                time_stamp = datetime.datetime.now()
+                time_stamp = datetime.now()
                 log.write(row["Satellite"] + " " + str(time_stamp) + ": " + str(current_az) + ", " + str(current_el) + "\n")    
 
 
                 if(row["Satellite"] == pass_list.iloc[index + 1]["Satellite"]):
-                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize("UTC") > datetime.datetime.now(datetime.UTC):
+                        while pd.to_datetime(pass_list.iloc[index + 1]["Timestamp (UTC)"]).tz_localize("UTC") > datetime.now(timezone.utc):
                                 pass
                 else:
                         continue
@@ -173,7 +171,7 @@ except KeyboardInterrupt:
         log.write("run was ended by user \n")
         log.write("Total failed writes: " + str(failed_writes) + "\n")
         log.write("failed writes rate: " + str(failed_writes/total) + "\n")
-        log.write("End time stamp " + str(datetime.datetime.now()) + "\n")
+        log.write("End time stamp " + str(datetime.now()) + "\n")
         try:
                 carryout.close()
         except NameError:
